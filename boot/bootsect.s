@@ -95,7 +95,7 @@ ok_load_setup:
 	xor	bh,bh
 	int	0x10
 	
-	mov	cx,#94
+	mov	cx,#108
 	mov	bx,#0x0007		! page 0, attribute 7 (normal)
 	mov	bp,#msg1
 	mov	ax,#0x1301		! write string, move cursor
@@ -243,11 +243,13 @@ sectors:
 
 msg1:
 	.byte 13,10
-	.ascii "          ___       __   __"
+	.ascii "     ___ ___     __   __"
 	.byte 13,10
-	.ascii "|__| |   | __  ___ |  | |__"
+	.ascii "|__|  |   | ___ |  | |__"
 	.byte 13,10
-	.ascii "|  | |__ |___|     |__|  __|"
+	.ascii "|  | _|_  |     |__|  __|"
+	.byte 13,10
+	.ascii "pokerface is booting ..."
 	.byte 13,10,13,10
 
 .org 508
