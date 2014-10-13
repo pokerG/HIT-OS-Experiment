@@ -1,20 +1,19 @@
 #define __LIBRARY__
 #include <unistd.h>
-#include <string.h>
-#include <errno.h>
 #include <stdio.h>
+#include <string.h>
 
-_syscall2(int,whoami,char*,name,unsigned int,size)
+_syscall2(int,whoami,const char*,name,unsigned int,size);
 
 int main(){
 	int count;
-	char name[30] = {0};
-	count = whoami(name,30);
-	if(count < 0){
-		printf("SystemCall Exception!\n");
+	char name[25] = {0};
+	count = whoami(name,25);
+	if(count <0){
+		printf("SysCall Exception!\n");
 		return -1;
 	}else{
-		printf("%s\n",name);
+		printf("%s\n", name);
 	}
 	return 0;
 }
