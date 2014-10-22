@@ -170,9 +170,7 @@ void sleep_on(struct task_struct **p)
 	tmp = *p;
 	*p = current;
 	current->state = TASK_UNINTERRUPTIBLE;
-	if(current->pid != 0){
-		fprintk(3, "%ld\t%c\t%ld\n", current->pid, 'W', jiffies); //向log文件输出
-	}
+	fprintk(3, "%ld\t%c\t%ld\n", current->pid, 'W', jiffies); //向log文件输出
 
 	schedule();
 	if (tmp){
@@ -193,9 +191,7 @@ void interruptible_sleep_on(struct task_struct **p)
 	tmp=*p;
 	*p=current;
 repeat:	current->state = TASK_INTERRUPTIBLE;
-	if(current->pid != 0){
-		fprintk(3, "%ld\t%c\t%ld\n", current->pid, 'W', jiffies); //向log文件输出
-	}
+	fprintk(3, "%ld\t%c\t%ld\n", current->pid, 'W', jiffies); //向log文件输出
 	schedule();
 	if (*p && *p != current) {
 		(**p).state=TASK_RUNNING;

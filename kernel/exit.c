@@ -185,9 +185,7 @@ repeat:
 		if (options & WNOHANG)
 			return 0;
 		current->state=TASK_INTERRUPTIBLE;
-		if(current->pid !=0){
-			fprintk(3, "%ld\t%c\t%ld\n", current->pid, 'W', jiffies); //向log文件输出
-		}
+		fprintk(3, "%ld\t%c\t%ld\n", current->pid, 'W', jiffies); //向log文件输出
 		schedule();
 		if (!(current->signal &= ~(1<<(SIGCHLD-1))))
 			goto repeat;
