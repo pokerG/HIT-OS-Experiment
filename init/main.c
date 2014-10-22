@@ -135,6 +135,11 @@ void main(void)		/* This really IS void, no error here. */
 	floppy_init();
 	sti();
 	move_to_user_mode();
+	setup((void *) &drive_info);
+	(void) open("/dev/tty0",O_RDWR,0);	//建立文件描述符0和/dev/tty0的关联
+	(void) dup(0);		//文件描述符1也和/dev/tty0关联
+	(void) dup(0);		//文件描述符2也和/dev/tty0关联
+	(void) open("/var/process.log",O_CREAT|O_TRUNC|O_WRONLY,0666);
 	if (!fork()) {		/* we count on this going ok */
 		init();
 	}
@@ -173,6 +178,7 @@ void init(void)
 	(void) open("/dev/tty0",O_RDWR,0);
 	(void) dup(0);
 	(void) dup(0);
+
 	printf("%d buffers = %d bytes buffer space\n\r",NR_BUFFERS,
 		NR_BUFFERS*BLOCK_SIZE);
 	printf("Free mem: %d bytes\n\r",memory_end-main_memory_start);
