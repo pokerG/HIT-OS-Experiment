@@ -262,7 +262,7 @@ pid_t setsid(void);
 typedef struct sem_queue
 {	
 	int front,rear;
-	struct task_struct * task[QUEUE_LIMIT];
+	struct task_struct * task[QUEUE_LIMIT]; /*maybe linkedList better*/
 	
 }sem_queue;
 
