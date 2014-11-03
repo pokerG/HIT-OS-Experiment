@@ -30,6 +30,7 @@ sem_t* sys_sem_open(const char *name,unsigned int value){
 	(newsem->wait_task).rear = 0;
 	for(i = 0; i < SEM_NUM; i++){
 		if(semaphore[i] != NULL && strcmp(semaphore[i]->name,name) == 0){
+			free_page((long)newsem);
 			sti();
 			return semaphore[i];  //already have this sem
 		}
@@ -77,8 +78,10 @@ int sys_sem_post(sem_t * sem){
 int sys_sem_unlink(const char *name){
 	cli();
 	int i; 
+	char sname[SEM_NAME_LIMIT];
+	for(i = 0; (sname[i] = get_fs_byte(name + i)) != '\0' && i < SEM_NAME_LIMIT;i++);
 	for(i = 0; i < SEM_NUM;i++){
-		if(semaphore[i] != NULL && strcmp(semaphore[i]->name,name) == 0){
+		if(semaphore[i] != NULL && strcmp(semaphore[i]->name,sname) == 0){
 			free_page((long)semaphore[i]);
 			break;
 		}

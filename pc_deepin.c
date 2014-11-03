@@ -60,7 +60,7 @@ int main(){
 			exit(0);
 		}
 	}
-	wait(NULL);
+    while(-1 != wait(NULL));
 	sem_unlink("empty");
 	sem_unlink("full");
 	sem_unlink("mutex");
