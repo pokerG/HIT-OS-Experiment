@@ -26,18 +26,18 @@ int readBuffer(int fd,int out_pos,int* num){
 
 int main(){
 	int i,j,k;
-	sem_t   *empty, *full, *mutex;
 	int fd;
 	int in_pos = 0;
 	int out_pos = 0;
 	int tmpNum;
 	fd = open("write.txt",O_RDWR|O_CREAT,0666);
-    empty =(sem_t *)sem_open("empty",BUFFER_SIZE);
-    full  = (sem_t *)sem_open("full",0);
-    mutex = (sem_t *)sem_open("mutex",1);
-
 	writeBuffer(fd,10,out_pos);	
+	
 	if(!fork()){
+		sem_t   *empty, *full, *mutex;
+		empty =(sem_t *)sem_open("empty",BUFFER_SIZE);
+		full  = (sem_t *)sem_open("full",0);
+   	 	mutex = (sem_t *)sem_open("mutex",1);
 		for(i = 0; i < M; i++){
 			sem_wait(empty);
 			sem_wait(mutex);
@@ -51,6 +51,10 @@ int main(){
 
 	for(j = 0; j < N;j++){
 		if(!fork()){
+			sem_t   *empty, *full, *mutex;
+			empty =(sem_t *)sem_open("empty",BUFFER_SIZE);
+			full  = (sem_t *)sem_open("full",0);
+   	 		mutex = (sem_t *)sem_open("mutex",1);
 			for(k = 0; k < M / N; k ++){
 				sem_wait(full);
 				sem_wait(mutex);

@@ -10,38 +10,29 @@ sem_t* semaphore[SEM_NUM];
 
 sem_t* sys_sem_open(const char *name,unsigned int value){
 	sem_t *newsem;
-	cli();
-	newsem = (sem_t *)get_free_page(); // the idea from fork and exit
-	if(!newsem) return NULL;
-
-	int i = 0;
-	while(get_fs_byte(name + i) != '\0'){
-		i++;
-		if(i > SEM_NAME_LIMIT){
-			errno = EINVAL;
+	char sname[SEM_NAME_LIMIT];
+	int i;
+	for(i = 0; (sname[i] = get_fs_byte(name + i)) != '\0' && i < SEM_NAME_LIMIT;i++);
+	if(i >= SEM_NAME_LIMIT){
 			return NULL;
-		}
 	}
-	for(;i >= 0; i--){
-		newsem->name[i] = get_fs_byte(name + i);	
-	}
-	newsem->value = value;
-	(newsem->wait_task).front = 0;
-	(newsem->wait_task).rear = 0;
 	for(i = 0; i < SEM_NUM; i++){
-		if(semaphore[i] != NULL && strcmp(semaphore[i]->name,name) == 0){
-			free_page((long)newsem);
-			sti();
+		if(semaphore[i] != NULL && strcmp(semaphore[i]->name,sname) == 0){
 			return semaphore[i];  //already have this sem
 		}
 	}
+	newsem = (sem_t *)get_free_page(); // the idea from fork and exit
+	if(!newsem) return NULL;
+	strcpy(newsem->name,sname);
+	newsem->value = value;
+	(newsem->wait_task).front = 0;
+	(newsem->wait_task).rear = 0;
 	for(i = 0 ; i < SEM_NUM; i++){
 		if(semaphore[i] == NULL){
 			semaphore[i] = newsem;
 			break;
 		}
 	}
-	sti();
 	return i == SEM_NUM ? NULL:newsem;
 }
 
@@ -52,8 +43,9 @@ int sys_sem_wait(sem_t * sem){
 	if(sem->value < 0 ){
 		if(((sem->wait_task).rear + 1) % QUEUE_LIMIT != (sem->wait_task).front){
 			(sem->wait_task).task[(sem->wait_task).rear] = current;
-			(sem->wait_task).rear = ((sem->wait_task).rear + 1) % QUEUE_LIMIT	 ;
-			sleep_on(current);
+			(sem->wait_task).rear = ((sem->wait_task).rear + 1) % QUEUE_LIMIT;
+			current->state = TASK_UNINTERRUPTIBLE;
+			schedule();
 		} else{
 			sti();
 			return -1;
@@ -68,7 +60,7 @@ int sys_sem_post(sem_t * sem){
 	cli();
 	sem->value ++;
 	if(sem->value <= 0){
-		wake_up((sem->wait_task).task[(sem->wait_task).front]);
+		(sem->wait_task).task[(sem->wait_task).front]->state = TASK_RUNNING;
 		(sem->wait_task).front = ((sem->wait_task).front + 1) % QUEUE_LIMIT;
 	}
 	sti();
@@ -76,7 +68,6 @@ int sys_sem_post(sem_t * sem){
 }
 
 int sys_sem_unlink(const char *name){
-	cli();
 	int i; 
 	char sname[SEM_NAME_LIMIT];
 	for(i = 0; (sname[i] = get_fs_byte(name + i)) != '\0' && i < SEM_NAME_LIMIT;i++);
@@ -86,6 +77,5 @@ int sys_sem_unlink(const char *name){
 			break;
 		}
 	}
-	sti();
 	return i == SEM_NUM ? -1 : 0; 
 }
