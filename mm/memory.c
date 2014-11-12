@@ -95,7 +95,7 @@ void free_page(unsigned long addr)
 	addr >>= 12;
 	if (mem_map[addr]--) return;
 	mem_map[addr]=0;
-	panic("trying to free free page");
+	//panic("trying to free free page");
 }
 
 /*
@@ -202,8 +202,8 @@ unsigned long put_page(unsigned long page,unsigned long address)
 
 	if (page < LOW_MEM || page >= HIGH_MEMORY)
 		printk("Trying to put page %p at %p\n",page,address);
-	if (mem_map[(page-LOW_MEM)>>12] != 1)
-		printk("mem_map disagrees with %p at %p\n",page,address);
+	//if (mem_map[(page-LOW_MEM)>>12] != 1)
+	//	printk("mem_map disagrees with %p at %p\n",page,address);
 	page_table = (unsigned long *) ((address>>20) & 0xffc);
 	if ((*page_table)&1)
 		page_table = (unsigned long *) (0xfffff000 & *page_table);

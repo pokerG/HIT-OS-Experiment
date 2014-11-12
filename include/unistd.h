@@ -129,6 +129,12 @@
 #define __NR_ssetmask	69
 #define __NR_setreuid	70
 #define __NR_setregid	71
+#define __NR_sem_open 	72
+#define __NR_sem_wait	73
+#define __NR_sem_post	74
+#define __NR_sem_unlink 75
+#define __NR_shmget		76
+#define __NR_shmat		77
 
 #define _syscall0(type,name) \
 type name(void) \
@@ -250,4 +256,27 @@ int getppid(void);
 pid_t getpgrp(void);
 pid_t setsid(void);
 
+/**
+ * sem struct 
+ */
+#define QUEUE_LIMIT 20
+#define SEM_NAME_LIMIT 20
+typedef struct sem_queue
+{	
+	int front,rear;
+	struct task_struct * task[QUEUE_LIMIT]; /*maybe linkedList better*/
+	
+}sem_queue;
+
+typedef struct sem_t
+{
+	char name[SEM_NAME_LIMIT];
+	int value;
+	sem_queue wait_task; 
+}sem_t;
+
+#ifndef _KEY_T
+#define _KEY_T
+typedef unsigned int key_t;
+#endif
 #endif
