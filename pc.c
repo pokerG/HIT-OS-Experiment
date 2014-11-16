@@ -13,7 +13,7 @@
 _syscall2(int,sem_open,const char*,name,unsigned int,value);
 _syscall1(int,sem_wait,sem_t*,sem);
 _syscall1(int,sem_post,sem_t*,sem);
-_syscall1(int,sem_unlink,sem_t*,sem);
+_syscall1(int,sem_unlink,const char*,name);
 
 int writeBuffer(int fd,int in_pos,int num){
 	lseek(fd,in_pos * sizeof(int),SEEK_SET);
