@@ -9,7 +9,7 @@
 _syscall2(int,sem_open,const char*,name,unsigned int,value);
 _syscall1(int,sem_wait,sem_t*,sem);
 _syscall1(int,sem_post,sem_t*,sem);
-_syscall1(int,sem_unlink,sem_t*,sem);
+_syscall1(int,sem_unlink,const char*,name);
 _syscall2(int,shmget,key_t,key,size_t,size);
 _syscall1(void*,shmat,int,shmid); 
 
