@@ -26,7 +26,7 @@ int main(){
     for( i = 0 ; i < N; i++){  
         sem_wait(full);  
         sem_wait(mutex);  
-        printf("%d\n",laddr[i]);  
+        printf("%d\n",laddr[i%BUFFER_SIZE]);  
         fflush(stdout);  
         sem_post(mutex);  
         sem_post(empty);  

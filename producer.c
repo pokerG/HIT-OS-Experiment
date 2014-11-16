@@ -28,7 +28,7 @@ int main()
     for( i = 0 ; i < N; i++) {  
         sem_wait(empty);  
         sem_wait(mutex);  
-        laddr[i] = i;  
+        laddr[i%BUFFER_SIZE] = i;  
         sem_post(mutex);  
         sem_post(full);  
     }  

@@ -21,7 +21,7 @@ int sys_shmget(key_t key,size_t size){
 }
 
 void *sys_shmat(int shmid){
-	if(shmid < 0 || shmid > SHM_LIMIT)
+	if(shmid < 0 || shmid >= SHM_LIMIT)
 		return -EINVAL;
 	put_page(shm[shmid],get_base(current->ldt[1]) + current->brk);
 	return (void*)current->brk;
