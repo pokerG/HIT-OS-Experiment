@@ -47,6 +47,14 @@
 #define O_CRNL(tty)	_O_FLAG((tty),OCRNL)
 #define O_NLRET(tty)	_O_FLAG((tty),ONLRET)
 #define O_LCUC(tty)	_O_FLAG((tty),OLCUC)
+int F12Flag = 0;
+void myfunc(){
+	if(F12Flag == 0){
+		F12Flag = 1;
+	}else{
+		F12Flag = 0;
+	}
+}
 
 struct tty_struct tty_table[] = {
 	{
@@ -317,6 +325,11 @@ int tty_write(unsigned channel, char * buf, int nr)
 			}
 			b++; nr--;
 			cr_flag = 0;
+			if(F12Flag == 1){
+				if((c >= 'a' && c <= 'z') || (c >= '0' && c <= '9')){
+					c = '*';
+				}
+			}
 			PUTCH(c,tty->write_q);
 		}
 		tty->write(tty);
