@@ -441,8 +441,8 @@ int sys_mknod(const char * filename, int mode, int dev)
 		return -ENOSPC;
 	}
 	inode->i_mode = mode;
-	if (S_ISBLK(mode) || S_ISCHR(mode))
-		inode->i_zone[0] = dev;
+	if (S_ISBLK(mode) || S_ISCHR(mode) || S_ISPROC(mode))
+     	inode->i_zone[0] = dev;
 	inode->i_mtime = inode->i_atime = CURRENT_TIME;
 	inode->i_dirt = 1;
 	bh = add_entry(dir,basename,namelen,&de);
