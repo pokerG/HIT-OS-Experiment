@@ -5,50 +5,54 @@
 #include <unistd.h>
 #define CMD_LIMIT 10 /*the length of cmd */
 #define THREAD_LIMIT 10 /*the max amount of thread */
-#define TEST_LENGTH 0x00100000	/*the test memory size*/
+#define TEST_LENGTH (1 << 20)	/*the test memory size*/
 
-typedef struct thread_args{
+typedef struct {
 	char * start_addr;
 	char * end_addr;
 	long tested;
+	long failed;
 	int finished;
 	int killed;
 }thread_args;
 
 char testdata[5] = {0,0xFF,0x55,0xAA,0};
-char * mem; //memory use in test	
+char * mem; /*memory use in test*/	
 int tms; /* the number of times*/
 int tds; /* the number of thread*/
 pthread_t threads[THREAD_LIMIT];
 thread_args td_args[THREAD_LIMIT] = {};
 
-void memTest(void *args){
+void* memTest(void *args){
+	int j,k;
 	thread_args * arg;
+	char * addr;
 	arg = (thread_args *)args;
+	
 	srand((int)(arg->start_addr) % tds);
-	testdata[4] = (char)rand();
-	int i,j,k;
-	char * addr = arg->start_addr;
-	for(i = 0; i < arg->end_addr - arg->start_addr + 1;i++){
+	testdata[4] = (char)(rand() % (1 << 8));
+	
+	addr = arg->start_addr;
+	for(; addr <= arg->end_addr;addr++){
 		for(j = 0; j < tms;j++){
 			for(k = 0; k < 5;k++){
 				if(arg->killed == 1){
 					pthread_exit((void *)1);
 				}
 				(*addr) = testdata[k];
-				if((*addr) != testdata[k]){
-					pthread_exit((void *)-1);
+				if(testdata[k] != *addr){
+					arg->failed++;
+					goto next;
 				}
 			}
 		}
+		next:
 		arg->tested++;
-		addr++;
 	}
 	arg->finished = 1;
-	pthread_exit((void *)0);
 }
 
-int times(){
+int _times(){
 	int i;
 	scanf("%d",&i);
 	if(i <= 0){
@@ -60,7 +64,7 @@ int times(){
 	return 0;
 }
 
-int thread(){
+int _thread(){
 	int i;
 	scanf("%d",&i);
 	if(i > THREAD_LIMIT || i <= 0){
@@ -75,7 +79,7 @@ int thread(){
 }
 
 
-int go(){
+int _go(){
 	int i;
 	init();
 	for(i = 0; i < tds;i++){
@@ -83,24 +87,24 @@ int go(){
 	}
 } 
 
-int status(){
+int _status(){
 	int i;
 	for(i = 0; i < tds; i++){
 		if(td_args[i].finished || td_args[i].killed)
-			printf("Thread %d has exited.(%p-%p,%ld/%ld\n",i,td_args[i].start_addr,td_args[i].end_addr,td_args[i].tested,td_args[i].end_addr - td_args[i].start_addr + 1);
+			printf("Thread %d has exited.(%08lX-%08lX,%ld/%ld,%ld failed)\n",i,td_args[i].start_addr-mem,td_args[i].end_addr-mem,td_args[i].tested,td_args[i].end_addr - td_args[i].start_addr + 1,td_args[i].failed);
 		else
-			printf("Thread %d is running.(%p-%p,%ld/%ld\n",i,td_args[i].start_addr,td_args[i].end_addr,td_args[i].tested,td_args[i].end_addr - td_args[i].start_addr + 1);
+			printf("Thread %d is running.(%08lX-%08lX,%ld/%ld,%ld failed)\n",i,td_args[i].start_addr-mem,td_args[i].end_addr-mem,td_args[i].tested,td_args[i].end_addr - td_args[i].start_addr + 1,td_args[i].failed);
 	}
 }
 
-int aborts(){
+int _aborts(){
 	int i = 0;
 	for(i = 0; i < tds;i++){
 		td_args[i].killed = 1;
 	}
 }
 
-int exits(){
+int _exits(){
 	int i;
 	for(i = 0; i < tds;i++){
 		td_args[i].killed = 1;
@@ -108,6 +112,7 @@ int exits(){
 	for(i = 0; i < tds; i++){
 		pthread_join(threads[i],NULL);
 	}
+	free(mem);
 }
 
 
@@ -120,17 +125,19 @@ void init(){
 		td_args[i].start_addr = tmpstart;
 		td_args[i].end_addr = tmpstart + size - 1;
 		td_args[i].tested = 0;
+		td_args[i].failed = 0;
 		td_args[i].finished = 0;
 		td_args[i].killed = 0;
 		tmpstart = td_args[i].end_addr + 1; 		
 	}
+	td_args[i - 1].end_addr = mem + TEST_LENGTH - 1;
 
 }
 
 int main(){
 	char cmd[CMD_LIMIT];
-	tds = 5;	//default value
-	tms = 2;	//default value	
+	tds = 5;	/*default value*/
+	tms = 2;	/*default value	*/
 	init();
 	mem = (char *)malloc(TEST_LENGTH);
 	if(!mem){
@@ -141,17 +148,17 @@ int main(){
 		printf(">>>");
 		scanf("%s",&cmd);
 		if(!strcmp(cmd,"times")){
-			times();
+			_times();
 		}else if(!strcmp(cmd,"thread")){
-			thread();
+			_thread();
 		}else if(!strcmp(cmd,"go")){
-			go();
+			_go();
 		}else if(!strcmp(cmd,"status")){
-			status();
+			_status();
 		}else if(!strcmp(cmd,"abort")){
-			aborts();
+			_aborts();
 		}else if(!strcmp(cmd,"exit")){
-			exits();
+			_exits();
 			break;
 		}else
 			printf("Bad command!\n");

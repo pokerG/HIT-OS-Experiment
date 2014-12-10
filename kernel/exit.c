@@ -80,7 +80,7 @@ int sys_kill(int pid,int sig)
 	return retval;
 }
 
-static void tell_father(int pid)
+void tell_father(int pid)
 {
 	int i;
 
