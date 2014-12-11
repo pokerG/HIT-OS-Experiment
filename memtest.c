@@ -146,6 +146,7 @@ int main(){
 	}
 	while(1){
 		printf(">>>");
+		fflush(stdout);
 		scanf("%s",&cmd);
 		if(!strcmp(cmd,"times")){
 			_times();

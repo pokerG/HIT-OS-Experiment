@@ -32,7 +32,7 @@ void release(struct task_struct * p)
 	panic("trying to release non-existent task");
 }
 
-static inline int send_sig(long sig,struct task_struct * p,int priv)
+int send_sig(long sig,struct task_struct * p,int priv)
 {
 	if (!p || sig<1 || sig>32)
 		return -EINVAL;
@@ -43,7 +43,7 @@ static inline int send_sig(long sig,struct task_struct * p,int priv)
 	return 0;
 }
 
-static void kill_session(void)
+void kill_session(void)
 {
 	struct task_struct **p = NR_TASKS + task;
 	
